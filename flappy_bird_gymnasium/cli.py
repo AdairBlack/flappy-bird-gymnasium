@@ -31,8 +31,11 @@ import time
 import gymnasium
 import pygame
 
-import flappy_bird_gymnasium
-from flappy_bird_gymnasium.tests.test_dqn import play as dqn_agent_env
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+#from flappy_bird_gymnasium.tests.test_dqn import play as dqn_agent_env
 from flappy_bird_gymnasium.tests.test_human import play as human_agent_env
 from flappy_bird_gymnasium.tests.test_random import play as random_agent_env
 
