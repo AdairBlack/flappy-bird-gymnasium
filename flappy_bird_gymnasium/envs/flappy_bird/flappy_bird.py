@@ -29,7 +29,7 @@ Some of the code in this module is an adaption of the code in the `FlapPyBird`
 GitHub repository by `sourahbhv` (https://github.com/sourabhv/FlapPyBird),
 released under the MIT license.
 
-Some of the code in this module is an adaption of the code in the `FlapPyBird gymnasium`
+Some of the code in this module is an adaption of the code in the `flappy-bird-gymnasium`
 GitHub repository by `markub3327` (https://github.com/AdairBlack/flappy-bird-gymnasium),
 released under the MIT license.
 """
@@ -38,8 +38,7 @@ from enum import IntEnum
 from itertools import cycle
 from typing import Dict, Optional, Tuple, Union
 import pygame
-
-from flappy_bird_gymnasium.envs import utils
+import utils
 from constants import (
     BACKGROUND_WIDTH,
     BASE_WIDTH,
@@ -57,24 +56,15 @@ from constants import (
     PLAYER_VEL_ROT,
     PLAYER_WIDTH,
 )
-#from flappy_bird_gymnasium.envs.lidar import LIDAR
+from lidar import LIDAR
 
-class FlappyBird(gymnasium.Env):
-    """Flappy Bird Gymnasium environment that yields simple observations.
 
-    The observations yielded by this environment are simple numerical
-    information about the game's state. Specifically, the observations are:
-
-        * Horizontal distance to the next pipe;
-        * Difference between the player's y position and the next hole's y
-          position.
-
-    The reward received by the agent in each step is equal to the score obtained
-    by the agent in that step. A score point is obtained every time the bird
-    passes a pipe.
+class FlappyBird():
+    """FlappyBird pygame.
 
     Args:
         screen_size (Tuple[int, int]): The screen's width and height.
+        audio_on (bool): If `True`, the game will play sounds.
         normalize_obs (bool): If `True`, the observations will be normalized
             before being returned.
         pipe_gap (int): Space between a lower and an upper pipe.
@@ -87,13 +77,15 @@ class FlappyBird(gymnasium.Env):
             be drawn.
     """
 
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
+    metadata = {
+        "render_modes": ["human", "rgb_array"],
+        "render_fps": 30
+    }
 
     def __init__(
         self,
         screen_size: Tuple[int, int] = (288, 512),
         audio_on: bool = False,
-        normalize_obs: bool = True,
         use_lidar: bool = True,
         pipe_gap: int = 100,
         bird_color: str = "yellow",
@@ -110,7 +102,6 @@ class FlappyBird(gymnasium.Env):
 
         self._screen_width = screen_size[0]
         self._screen_height = screen_size[1]
-        self._normalize_obs = normalize_obs
         self._pipe_gap = pipe_gap
         self._audio_on = audio_on
         self._use_lidar = use_lidar
@@ -212,7 +203,8 @@ class FlappyBird(gymnasium.Env):
             self._player_rot = 45
 
         self._player_y += min(
-            self._player_vel_y, self._ground["y"] - self._player_y - PLAYER_HEIGHT
+            self._player_vel_y, self._ground["y"] -
+            self._player_y - PLAYER_HEIGHT
         )
 
         # move pipes to left
@@ -306,7 +298,8 @@ class FlappyBird(gymnasium.Env):
             obs,
             reward,
             terminal,
-            (self._score_limit is not None) and (self._score >= self._score_limit),
+            (self._score_limit is not None) and (
+                self._score >= self._score_limit),
             info,
         )
 
@@ -530,7 +523,8 @@ class FlappyBird(gymnasium.Env):
                 continue
 
             if type(value) in (tuple, list):
-                self._images[name] = tuple([img.convert_alpha() for img in value])
+                self._images[name] = tuple(
+                    [img.convert_alpha() for img in value])
             else:
                 self._images[name] = (
                     value.convert() if name == "background" else value.convert_alpha()
@@ -548,7 +542,8 @@ class FlappyBird(gymnasium.Env):
 
         for digit in score_digits:
             self._surface.blit(
-                self._images["numbers"][digit], (x_offset, self._screen_height * 0.1)
+                self._images["numbers"][digit], (x_offset,
+                                                 self._screen_height * 0.1)
             )
             x_offset += self._images["numbers"][digit].get_width()
 
@@ -569,11 +564,14 @@ class FlappyBird(gymnasium.Env):
 
         # Pipes
         for up_pipe, low_pipe in zip(self._upper_pipes, self._lower_pipes):
-            self._surface.blit(self._images["pipe"][0], (up_pipe["x"], up_pipe["y"]))
-            self._surface.blit(self._images["pipe"][1], (low_pipe["x"], low_pipe["y"]))
+            self._surface.blit(
+                self._images["pipe"][0], (up_pipe["x"], up_pipe["y"]))
+            self._surface.blit(
+                self._images["pipe"][1], (low_pipe["x"], low_pipe["y"]))
 
         # Base (ground)
-        self._surface.blit(self._images["base"], (self._ground["x"], self._ground["y"]))
+        self._surface.blit(self._images["base"],
+                           (self._ground["x"], self._ground["y"]))
 
         # Getting player's rotation
         visible_rot = PLAYER_ROT_THR
@@ -684,6 +682,7 @@ class FlappyBird(gymnasium.Env):
         # Sounds:
         if self._audio_on and self._sound_cache is not None:
             self._sounds[self._sound_cache].play()
+
 
 def play():
     flappyBird = FlappyBird()
